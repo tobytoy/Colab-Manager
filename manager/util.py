@@ -270,6 +270,16 @@ class Cipher():
     def decrypt(self, eb: str, tb: str, nb: str) -> str:
         e, t, n = map(lambda x: b64decode(x), [eb, tb, nb])
         return AES.new(self._u8, AES.MODE_EAX, nonce=n).decrypt_and_verify(e, t).decode('utf-8')
+    def check(self, check_data: dict) -> bool:
+        try:
+            _flag = float(self.decrypt(*check_data['check']).split('-')[1]) < time.time() if 'check' in check_data.keys() else False
+            return _flag
+        except Exception as err:
+            if str(err) == 'MAC check failed':
+                print('你帳號或密碼有問題')
+            else:
+                print(f"Unexpected {err=}, {type(err)=}")
+            return False
 
 
 class Fairy:
@@ -308,6 +318,10 @@ class Fairy:
         if self.temp_root_path.exists() == False:
             subprocess.check_output(["mkdir", self.temp_root_path],
                                     stderr=subprocess.STDOUT)
+        
+        # deal with account and password
+        with open(config["PATH"]["config_pickle_path"], 'rb') as f:
+            self.data_config = pickle.load(f)
 
         # deal with videos
         self.video_path = self.video_root_path / (video_name + ".mp4")
