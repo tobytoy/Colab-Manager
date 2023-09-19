@@ -43,7 +43,7 @@ pip-delete-this-directory.txt
 
 
 # Big files
-*.mp4
+
 
 
 # Unit test / coverage reports
