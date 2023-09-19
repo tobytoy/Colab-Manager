@@ -1,0 +1,10 @@
+Flask
+matplotlib
+moviepy
+numpy==1.23.5
+opencv-python
+pycryptodomex
+Pillow
+PyGithub
+pyngrok
+tensorflow
