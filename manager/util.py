@@ -24,7 +24,7 @@ json_schema = {
     "required": ["version", "label", "duration", "focusOnHumanKeypoint"],
     "properties": {
         "version": {
-            "enum": ["v1.1.1"]
+            "enum": ["v1.2.1"]
         },
         "label": {
             "enum": [[]]
@@ -265,14 +265,20 @@ def focusOnHumanKeypoint_check(item):
 
 class Cipher():
     def __init__(self, acc: str, pa: str) -> None:
-        acc_n = sum([ord(_) for _ in acc]); s_p_s = "".join([chr(i) for i in range(33,127)]); p_n = acc_n % ( 32 - len(pa) )
-        self._u8 = (pa[:32] if len(pa) >= 32  else acc[acc_n % len(acc)] * p_n + pa + s_p_s[acc_n % len(s_p_s)] * (32 - len(pa) - p_n)).encode('utf-8')
-    def decrypt(self, eb: str, tb: str, nb: str) -> str:
+        acc_n = sum([ord(_) for _ in acc])
+        s_p_s = "".join([chr(i) for i in range(33, 127)])
+        p_n = acc_n % (32 - len(pa))
+        self._u8 = (pa[:32] if len(pa) >= 32 else acc[acc_n % len(
+            acc)] * p_n + pa + s_p_s[acc_n % len(s_p_s)] * (32 - len(pa) - p_n)).encode('utf-8')
+
+    def decrypt(self, eb: str, tb: str, nb: str) -> list[str]:
         e, t, n = map(lambda x: b64decode(x), [eb, tb, nb])
         return AES.new(self._u8, AES.MODE_EAX, nonce=n).decrypt_and_verify(e, t).decode('utf-8')
+
     def check(self, check_data: dict) -> bool:
         try:
-            _flag = float(self.decrypt(*check_data['check']).split('-')[1]) < time.time() if 'check' in check_data.keys() else False
+            _flag = float(self.decrypt(*check_data['check']).split(
+                '-')[1]) < time.time() if 'check' in check_data.keys() else False
             return _flag
         except Exception as err:
             if str(err) == 'MAC check failed':
@@ -318,7 +324,7 @@ class Fairy:
         if self.temp_root_path.exists() == False:
             subprocess.check_output(["mkdir", self.temp_root_path],
                                     stderr=subprocess.STDOUT)
-        
+
         # deal with account and password
         with open(config["PATH"]["config_pickle_path"], 'rb') as f:
             self.data_config = pickle.load(f)
