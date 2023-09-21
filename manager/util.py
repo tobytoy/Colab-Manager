@@ -1,19 +1,28 @@
+import os
 import cv2
 import time
 import json
 import pickle
-import numpy as np
-import tensorflow as tf
+import github
+import atexit
+import shutil
+import zipfile
+import tempfile
+import requests
 import configparser
 import subprocess
-from pathlib import Path
+import hashlib
 from PIL import Image
+import numpy as np
+import tensorflow as tf
+from pathlib import Path
 from jsonschema import validate
 from jsonschema.exceptions import SchemaError, ValidationError
 from manager import tools
-import hashlib
 from Cryptodome.Cipher import AES
 from base64 import b64encode, b64decode
+from threading import Timer
+
 
 config = configparser.ConfigParser()
 config.read("manager/config/config.ini")
@@ -286,6 +295,104 @@ class Cipher():
             else:
                 print(f"Unexpected {err=}, {type(err)=}")
             return False
+
+
+class WebMaster:
+    def __init__(self, cipher, user, check_list, check_dict):
+        self.cipher = cipher
+        self.user = user
+        self.check_list = check_list
+        self.check_dict = check_dict
+        self.git_init(self.check_list, [1, 2])
+
+    def git_init(self, check_list, indexs):
+        cipher_list = list(
+            map(lambda x: self.cipher.decrypt(*self.check_dict[x]), check_list))
+        self.g_obj = (lambda x: github.Github(
+            auth=github.Auth.Token(x)))(cipher_list[indexs[0]])
+        self.g_repo = self.g_obj.get_repo(cipher_list[indexs[1]])
+
+    def git_check(self, check_list, index):
+        cipher_list = list(
+            map(lambda x: self.cipher.decrypt(*self.check_dict[x]), check_list))
+        try:
+            self.g_repo.get_contents(cipher_list[index])
+            return True, cipher_list[index]
+        except Exception as err:
+            if err.data['message'] == 'Not Found':
+                return False, None
+            else:
+                print(f"Unexpected {err=}, {type(err)=}")
+                return False, None
+
+    def git_get_contents(self, check_list, index):
+        _check = self.git_check(check_list, index)
+        if _check[0]:
+            return self.g_repo.get_contents(_check[1]).decoded_content.decode()
+
+    def git_create_update_contents(self, check_list, index, contents):
+        _check = self.git_check(check_list=check_list, index=index)
+        repo = self.g_repo
+        if _check[0]:
+            repo.update_file(_check[1], "update message", contents, repo.get_contents(
+                _check[1]).sha, branch="main")
+        else:
+            repo.create_file(_check[1], "init message",
+                             contents, branch="main")
+
+    def start_ngrok(self):
+        ngrok_address = self._run_ngrok()
+        if self.user == 'master':
+            cipher_list = list(
+                map(lambda x: self.cipher.decrypt(*self.check_dict[x]), ['ngrok_t']))
+        else:
+            cipher_list = list(
+                map(lambda x: self.cipher.decrypt(*self.check_dict[x]), ['ngrok']))
+        subprocess.check_output(
+            ['ngrok', 'authtoken', cipher_list[0]], stderr=subprocess.STDOUT)
+        time.sleep(1)
+        message = eval(self.git_get_contents(['cont_p'], 0))
+        message['colab']['ngrok'] = ngrok_address.split('.', 1)[
+            0].split('://')[1]
+        self.git_create_update_contents(['cont_p'], 0, json.dumps(message))
+        print(f" * Running on {ngrok_address}")
+        print(f" * Traffic stats available on http://127.0.0.1:4040")
+
+    def _download_ngrok(self, ngrok_path):
+        if Path(ngrok_path).exists():
+            return
+        url = "https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip"
+        with zipfile.ZipFile(self._download_file(url), "r") as zip_ref:
+            zip_ref.extractall(ngrok_path)
+
+    def _download_file(self, url):
+        local_filename = url.split('/')[-1]
+        r = requests.get(url, stream=True)
+        download_path = str(Path(tempfile.gettempdir(), local_filename))
+        with open(download_path, 'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+        return download_path
+
+    def _run_ngrok(self):
+        ngrok_path = str(Path(tempfile.gettempdir(), "ngrok"))
+        self._download_ngrok(ngrok_path)
+        executable = str(Path(ngrok_path, "ngrok"))
+        os.chmod(executable, 777)
+        ngrok = subprocess.Popen([executable, 'http', '5000'])
+        atexit.register(ngrok.terminate)
+        localhost_url = "http://localhost:4040/api/tunnels"  # Url with tunnel details
+        time.sleep(1)
+        return json.loads(requests.get(localhost_url).text)['tunnels'][0]['public_url'].replace("https", "http")
+
+    def run_with_ngrok(self, app):
+        old_run = app.run
+
+        def new_run():
+            thread = Timer(1, self.start_ngrok)
+            thread.setDaemon(True)
+            thread.start()
+            old_run()
+        app.run = new_run
 
 
 class Fairy:
