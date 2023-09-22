@@ -292,10 +292,9 @@ class Cipher():
 
     def check(self, check_data: dict) -> bool:
         try:
-            _flag = float(self.decrypt(*check_data['check']).split(
+            self._flag = float(self.decrypt(*check_data['check']).split(
                 '-')[1]) < time.time() if 'check' in check_data.keys() else False
-            self.check = _flag
-            return _flag
+            return self._flag
         except Exception as err:
             if str(err) == 'MAC check failed':
                 print('你帳號或密碼有問題')
