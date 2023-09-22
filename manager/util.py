@@ -449,24 +449,6 @@ class Fairy:
         with open(config["PATH"]["config_pickle_path"], 'rb') as f:
             self.data_config = pickle.load(f)
 
-        # deal with videos
-        self.video_path = self.video_root_path / (video_name + ".mp4")
-
-        if self.video_path.exists() == False and len(list(self.video_root_path.glob('*.mp4'))) > 0:
-            self.video_path = list(self.video_root_path.glob('*.mp4'))[0]
-
-        print(
-            f"video path : {self.video_path}, model path : {self.model_path}")
-
-    def set_video(self, video_name='Kettlebells-Emily'):
-        # deal with videos
-        self.video_path = self.video_root_path / (video_name + ".mp4")
-
-        if self.video_path.exists() == False and len(list(self.video_root_path.glob('*.mp4'))) > 0:
-            self.video_path = list(self.video_root_path.glob('*.mp4'))[0]
-
-        print(
-            f"video path : {self.video_path}, model path : {self.model_path}")
 
     def model_inference_video(self):
         self.model = tf.saved_model.load(self.model_path)
