@@ -21,8 +21,7 @@ wid_project = widgets.Text(description='Project')
 
 wid_login_btn = widgets.Button(description='Login', disabled=False)
 
-# focus_video_list = list(fairy.video_root_path.glob('*.mp4')) + list(fairy.video_output_root_path.glob('*.mp4'))
-# focus_data_list = list(fairy.data_root_path.glob('*.*')) + list(fairy.data_output_root_path.glob('*.*'))
+
 
 wid_upload_videos_btn = widgets.Button(
     description='Upload Videos', disabled=False)
@@ -60,6 +59,13 @@ def login_btn(wid_login_btn):
     if cipher.check(fairy.data_config[wid_username.value]):
         rich.print('設定完畢，歡迎使用。')
 
+def focus_video_fun():
+    return list(fairy.video_root_path.glob('*.mp4')) + list(fairy.video_output_root_path.glob('*.mp4'))
+
+def focus_data_fun():
+    return list(fairy.data_root_path.glob('*.*')) + list(fairy.data_output_root_path.glob('*.*'))
+
+
 
 def upload_videos_btn(wid_upload_videos_btn):
     uploaded = files.upload()
@@ -68,8 +74,7 @@ def upload_videos_btn(wid_upload_videos_btn):
     # update the videos dropdown
     wid_video = widgets.Dropdown(
         options=[(item.name, item)
-                for i, item in enumerate(list(fairy.video_root_path.glob('*.mp4')) +
-                                        list(fairy.video_output_root_path.glob('*.mp4')))
+                for i, item in enumerate(focus_video_fun())
                 ],
         description='Video : ',
     )
@@ -81,8 +86,7 @@ def upload_datas_btn(wid_upload_datas_btn):
     # update the datas dropdown
     wid_data = widgets.Dropdown(
         options=[(item.name, item)
-                for i, item in enumerate(list(fairy.data_root_path.glob('*.*')) +
-                                        list(fairy.data_output_root_path.glob('*.*')))
+                for i, item in enumerate(focus_data_fun())
                 ],
         description='Data : ',
     )
