@@ -1,6 +1,7 @@
 import os
 import rich
 import json
+import pytube
 import pickle
 import pandas
 from pathlib import Path
@@ -158,6 +159,17 @@ def data_show_tool(line):
                 rich.print(pickle.load(f))
         else:
             rich.print('not supported yet!')
+    else:
+        rich.print('請登入以後再使用')
+
+
+@register_line_magic
+def demo_data_prepare(line):
+    clear_output()
+    if cipher._flag:
+        pyt_obj = pytube.YouTube( fairy.demo_video_url )
+        pyt_obj.streams.filter().get_highest_resolution().download(filename='demo_video.mp4')
+        os.rename('demo_video.mp4', (fairy.video_root_path/'demo_video.mp4') )
     else:
         rich.print('請登入以後再使用')
 

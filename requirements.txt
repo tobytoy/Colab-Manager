@@ -9,4 +9,5 @@ pycryptodomex==3.19.0
 Pillow==9.4.0
 PyGithub==1.59.1
 pyngrok==6.1.0
+pytube==15.0.0
 tensorflow==2.13.0

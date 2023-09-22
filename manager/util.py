@@ -406,6 +406,8 @@ class Fairy:
         # deal with models
         self.model_path = Path(config["PATH"]["model_path"])
         self.model_url = config["URL"]["model_url"]
+        self.demo_video_url = config["URL"]["demo_video_url"]
+
         self.model_download_path = Path(config["PATH"]["model_download_path"])
         if self.model_path.exists() == False:
             subprocess.check_output(["wget", self.model_url, "-O", str(self.model_download_path)],
