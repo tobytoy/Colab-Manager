@@ -25,8 +25,14 @@ def import_btn(wid_import_btn):
     wid_username.value = _content['username']
     wid_project.value = _content['project']
 
+wid_import_btn.on_click(import_btn)
+wid_login_btn.on_click(login_btn)
+
 def login_btn(wid_login_btn):
-    %toby_init
+    from manager.util import Cipher
+    cipher = Cipher(wid_account.value, wid_password.value)
+    if cipher.check(fairy.data_config[wid_username.value]):
+        rich.print('設定完畢，歡迎使用。')
 
 wid_import_btn.on_click(import_btn)
 wid_login_btn.on_click(login_btn)
@@ -42,9 +48,3 @@ def login_tool(line):
         )
     )
 
-@register_line_magic
-def toby_init(line):
-    from manager.util import Cipher
-    cipher = Cipher(wid_account.value, wid_password.value)
-    if cipher.check(fairy.data_config[wid_username.value]):
-        rich.print('設定完畢，歡迎使用。')
