@@ -65,12 +65,27 @@ def upload_videos_btn(wid_upload_videos_btn):
     uploaded = files.upload()
     for filename, file_data in uploaded.items():
         os.rename(filename, (fairy.video_root_path/filename))
-
+    # update the videos dropdown
+    wid_video = widgets.Dropdown(
+        options=[(item.name, item)
+                for i, item in enumerate(list(fairy.video_root_path.glob('*.mp4')) +
+                                        list(fairy.video_output_root_path.glob('*.mp4')))
+                ],
+        description='Video : ',
+    )
 
 def upload_datas_btn(wid_upload_datas_btn):
     uploaded = files.upload()
     for filename, file_data in uploaded.items():
         os.rename(filename, (fairy.data_root_path/filename))
+    # update the datas dropdown
+    wid_data = widgets.Dropdown(
+        options=[(item.name, item)
+                for i, item in enumerate(list(fairy.data_root_path.glob('*.*')) +
+                                        list(fairy.data_output_root_path.glob('*.*')))
+                ],
+        description='Data : ',
+    )
 
 
 wid_import_btn.on_click(import_btn)
