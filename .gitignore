@@ -1,5 +1,5 @@
 # Folder
-videos/
+# videos/
 videos_output/
 datas_output/
 
@@ -44,7 +44,7 @@ pip-delete-this-directory.txt
 
 
 # Big files
-*.mp4
+# *.mp4
 
 
 # Unit test / coverage reports
