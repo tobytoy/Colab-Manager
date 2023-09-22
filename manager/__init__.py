@@ -25,9 +25,6 @@ def import_btn(wid_import_btn):
     wid_username.value = _content['username']
     wid_project.value = _content['project']
 
-wid_import_btn.on_click(import_btn)
-wid_login_btn.on_click(login_btn)
-
 def login_btn(wid_login_btn):
     from manager.util import Cipher
     cipher = Cipher(wid_account.value, wid_password.value)
