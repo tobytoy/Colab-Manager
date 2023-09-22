@@ -60,36 +60,32 @@ def login_btn(wid_login_btn):
         rich.print('設定完畢，歡迎使用。')
 
 def focus_video_fun():
-    return list(fairy.video_root_path.glob('*.mp4')) + list(fairy.video_output_root_path.glob('*.mp4'))
+    return list(fairy.video_root_path.glob('*.mp4')) \
+            + list(fairy.video_output_root_path.glob('*.mp4'))
 
 def focus_data_fun():
-    return list(fairy.data_root_path.glob('*.*')) + list(fairy.data_output_root_path.glob('*.*'))
-
-
+    return list(fairy.data_root_path.glob('*.xlsx')) \
+            + list(fairy.data_output_root_path.glob('*.xlsx')) \
+            + list(fairy.data_root_path.glob('*.json')) \
+            + list(fairy.data_output_root_path.glob('*.json')) \
+            + list(fairy.data_root_path.glob('*.pickle')) \
+            + list(fairy.data_output_root_path.glob('*.pickle'))
 
 def upload_videos_btn(wid_upload_videos_btn):
     uploaded = files.upload()
     for filename, file_data in uploaded.items():
         os.rename(filename, (fairy.video_root_path/filename))
     # update the videos dropdown
-    wid_video = widgets.Dropdown(
-        options=[(item.name, item)
-                for i, item in enumerate(focus_video_fun())
-                ],
-        description='Video : ',
-    )
+    wid_video.options = [(item.name, item) for i, item in enumerate(focus_video_fun())]
+    
 
 def upload_datas_btn(wid_upload_datas_btn):
     uploaded = files.upload()
     for filename, file_data in uploaded.items():
         os.rename(filename, (fairy.data_root_path/filename))
     # update the datas dropdown
-    wid_data = widgets.Dropdown(
-        options=[(item.name, item)
-                for i, item in enumerate(focus_data_fun())
-                ],
-        description='Data : ',
-    )
+    wid_data.options = [(item.name, item) for i, item in enumerate(focus_data_fun())]
+        
 
 
 wid_import_btn.on_click(import_btn)
