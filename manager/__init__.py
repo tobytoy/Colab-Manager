@@ -5,6 +5,8 @@ import pytube
 import pickle
 import pandas
 import base64
+import zipfile
+import openpyxl
 from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
@@ -66,8 +68,7 @@ def import_btn(wid_import_btn):
 
 def login_btn(wid_login_btn):
     cipher.u8(wid_account.value, wid_password.value)
-    # user_2 設定完要拿掉
-    if wid_username.value in fairy.data_config.keys() or wid_username.value == 'user_2':
+    if wid_username.value in fairy.data_config.keys():
         if cipher.check(fairy.data_config[wid_username.value]):
             rich.print('設定完畢，歡迎使用。')
     else:
@@ -106,12 +107,57 @@ def refresh_btn(wid_refresh_btn):
     wid_data.options = [(item.name, item) for i, item in enumerate(focus_data_fun())]
 
 
-
 wid_import_btn.on_click(import_btn)
 wid_login_btn.on_click(login_btn)
 wid_upload_videos_btn.on_click(upload_videos_btn)
 wid_upload_datas_btn.on_click(upload_datas_btn)
 wid_refresh_btn.on_click(refresh_btn)
+
+
+wid_download_btn = widgets.Button(
+    description='Download', disabled=False)
+
+wid_download = widgets.Dropdown(
+    options=[('All', 0), 
+             ('videos', 1),
+             ('output datas', 2),
+             ('output videos', 3),
+             ('output datas and videos', 4),],
+    description='Download Folders: ',
+)
+
+def download_btn(wid_download_btn):
+    if wid_download.value == 0:
+        folders_to_compress = [str(fairy.data_root_path), 
+                               str(fairy.data_output_root_path),
+                               str(fairy.video_root_path),
+                               str(fairy.video_output_root_path),]
+    elif wid_download.value == 1:
+        folders_to_compress = [str(fairy.video_root_path),]
+    elif wid_download.value == 2:
+        folders_to_compress = [str(fairy.data_output_root_path),]
+    elif wid_download.value == 3:
+        folders_to_compress = [str(fairy.video_output_root_path),]
+    elif wid_download.value == 4:
+        folders_to_compress = [str(fairy.data_output_root_path),
+                               str(fairy.video_output_root_path),]
+
+    zip_filename = fairy.temp_root_path / 'compressed_folders.zip'
+    with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for folder in folders_to_compress:
+            for root, dirs, _files in os.walk(folder):
+                for _file in _files:
+                    file_path = os.path.join(root, _file)
+                    relative_path = os.path.relpath(file_path, folder)
+                    zipf.write(file_path, arcname=relative_path)
+    
+    files.download(zip_filename)
+
+    
+
+wid_download_btn.on_click(download_btn)
+
+
 
 @register_line_magic
 def login_tool(line):
@@ -138,6 +184,16 @@ def path_manager(line):
                     widgets.HBox([wid_data, wid_upload_datas_btn]),
                 ]
             )
+        )
+    else:
+        rich.print('請登入以後再使用')
+
+@register_line_magic
+def download_tool(line):
+    clear_output()
+    if cipher._flag:
+        display(
+            widgets.HBox([wid_download, wid_download_btn])
         )
     else:
         rich.print('請登入以後再使用')
@@ -178,6 +234,61 @@ def demo_data_prepare(line):
         pyt_obj.streams.filter().get_highest_resolution().download(filename='demo_video.mp4')
         os.rename('demo_video.mp4', (fairy.video_root_path/'demo_video.mp4') )
         wid_video.options = [(item.name, item) for i, item in enumerate(focus_video_fun())]
+        wid_data.value = Path('datas/demo_content.xlsx')
+        wid_video.value = Path('videos/demo_video.mp4')
+    else:
+        rich.print('請登入以後再使用')
+
+
+@register_line_magic
+def excel_cut_video(line):
+    clear_output()
+    if cipher._flag:
+        # basic class label
+        sample_class_json = {
+            "version" : "v1.2.1",
+            "video_id" : "",
+            "brightcove_url" : "",
+            "actions_label" : []
+        }
+
+        wb = openpyxl.load_workbook(wid_data.value)
+        sheet = wb.active
+        action_number = 0
+        for i in range(sheet.max_row):
+            if sheet.cell(i+1,4).value and sheet.cell(i+1,4).value != '-' and i+1 > 3:
+                action_number += 1
+
+                start = sheet.cell(i+1,7).value
+                start_time = start.hour*60*60 + start.minute*60 + start.second
+                end = sheet.cell(i+1,8).value
+                end_time = end.hour*60*60 + end.minute*60 + end.second
+                duration = end_time - start_time
+
+                sample_class_json["actions_label"].append({
+                    "workout_name" : sheet.cell(i+1,3).value,
+                    "set" : int(sheet.cell(i+1,5).value),
+                    "repeats" : int(sheet.cell(i+1,6).value),
+                    "start_time" : start_time,
+                    "end_time" : end_time,
+                    "duration" : duration,
+                    "action_label" : {}
+                })
+        print(f"Excel 偵測到 {action_number} 個動作，開始剪輯影片")
+        video = VideoFileClip(str(wid_video.value))
+
+        for count, action in enumerate(sample_class_json['actions_label']):
+            if count < int(line):
+                print(f"Cutting : {count}/{action_number}")
+                output = video.subclip(action['start_time'], action['end_time'])
+                output.write_videofile(f"{str(fairy.video_root_path)}/{wid_project.value}_video_{count+1}.mp4",
+                            temp_audiofile="temp/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac", verbose=False)
+
+        with open(fairy.data_output_root_path / (wid_project.value + '_class.json'), 'w') as f:
+            json.dump(sample_class_json, f)
+
+        print('All Done')
+
     else:
         rich.print('請登入以後再使用')
 
