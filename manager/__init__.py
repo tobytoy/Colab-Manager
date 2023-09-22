@@ -3,13 +3,13 @@ import rich
 from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
-from manager.util import Fairy
+from manager.util import Fairy, Cipher
 from IPython.display import clear_output
 from IPython.core.magic import register_line_magic
 
 
 fairy = Fairy()
-cipher = None
+cipher = Cipher()
 
 wid_login_file = widgets.FileUpload(
     description='Upload login file', accept='.login',  multiple=False)
@@ -57,9 +57,7 @@ def import_btn(wid_import_btn):
 
 
 def login_btn(wid_login_btn):
-    global cipher
-    from manager.util import Cipher
-    cipher = Cipher(wid_account.value, wid_password.value)
+    cipher.u8(wid_account.value, wid_password.value)
     # user_2 設定完要拿掉
     if wid_username.value in fairy.data_config.keys() or wid_username.value == 'user_2':
         if cipher.check(fairy.data_config[wid_username.value]):
@@ -120,7 +118,7 @@ def login_tool(line):
 @register_line_magic
 def path_manager(line):
     clear_output()
-    if cipher.check:
+    if cipher._flags:
         display(
             widgets.VBox(
                 [
@@ -129,3 +127,5 @@ def path_manager(line):
                 ]
             )
         )
+    else:
+        rich.rprint('請登入')
