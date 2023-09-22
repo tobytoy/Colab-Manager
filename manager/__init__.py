@@ -4,6 +4,7 @@ import json
 import pytube
 import pickle
 import pandas
+import base64
 from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
@@ -21,7 +22,7 @@ wid_login_file = widgets.FileUpload(
 wid_import_btn = widgets.Button(
     description='Import login file', disabled=False)
 
-wid_account = widgets.Text(description='Account')
+wid_account = widgets.Password(description='Account')
 wid_password = widgets.Password(description='Password')
 wid_username = widgets.Dropdown(options=list(
     fairy.data_config.keys()), description='Username')
@@ -35,6 +36,8 @@ wid_upload_videos_btn = widgets.Button(
     description='Upload Videos', disabled=False)
 wid_upload_datas_btn = widgets.Button(
     description='Upload Datas', disabled=False)
+wid_refresh_btn = widgets.Button(
+    description='Refresh Videos and Datas', disabled=False)
 
 wid_video = widgets.Dropdown(
     options=[(item.name, item)
@@ -54,7 +57,7 @@ wid_data = widgets.Dropdown(
 
 def import_btn(wid_import_btn):
     _key = list(wid_login_file.value.keys())[0]
-    _content = eval(wid_login_file.value[_key]['content'].decode())
+    _content = eval(base64.b64decode(wid_login_file.value[_key]['content']).decode('UTF-8'))
     wid_account.value = _content['account']
     wid_password.value = _content['password']
     wid_username.value = _content['username']
@@ -98,13 +101,17 @@ def upload_datas_btn(wid_upload_datas_btn):
     # update the datas dropdown
     wid_data.options = [(item.name, item) for i, item in enumerate(focus_data_fun())]
         
+def refresh_btn(wid_refresh_btn):
+    wid_video.options = [(item.name, item) for i, item in enumerate(focus_video_fun())]
+    wid_data.options = [(item.name, item) for i, item in enumerate(focus_data_fun())]
+
 
 
 wid_import_btn.on_click(import_btn)
 wid_login_btn.on_click(login_btn)
 wid_upload_videos_btn.on_click(upload_videos_btn)
 wid_upload_datas_btn.on_click(upload_datas_btn)
-
+wid_refresh_btn.on_click(refresh_btn)
 
 @register_line_magic
 def login_tool(line):
@@ -127,7 +134,7 @@ def path_manager(line):
         display(
             widgets.VBox(
                 [
-                    widgets.HBox([wid_video, wid_upload_videos_btn]),
+                    widgets.HBox([wid_video, wid_upload_videos_btn, wid_refresh_btn]),
                     widgets.HBox([wid_data, wid_upload_datas_btn]),
                 ]
             )
@@ -170,6 +177,7 @@ def demo_data_prepare(line):
         pyt_obj = pytube.YouTube( fairy.demo_video_url )
         pyt_obj.streams.filter().get_highest_resolution().download(filename='demo_video.mp4')
         os.rename('demo_video.mp4', (fairy.video_root_path/'demo_video.mp4') )
+        wid_video.options = [(item.name, item) for i, item in enumerate(focus_video_fun())]
     else:
         rich.print('請登入以後再使用')
 
