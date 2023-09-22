@@ -75,7 +75,7 @@ class Video:
         # temp_audiofile
         if show:
             clip = VideoFileClip(video_target_path)
-            clip.ipython_display(width=500)
+            clip.ipython_display(width="60%")
 
         
 

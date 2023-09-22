@@ -139,7 +139,7 @@ def video_show_tool(line):
     clear_output()
     if cipher._flag:
         _rate = "50%" if line == "" else (line + "%")
-        VideoFileClip(str(wid_video.value)).ipython_display(width=_rate)
+        display(VideoFileClip(str(wid_video.value)).ipython_display(width=_rate))
     else:
         rich.print('請登入以後再使用')
 
