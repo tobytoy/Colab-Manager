@@ -4,7 +4,9 @@ from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
 from manager.util import Fairy
+from IPython.display import clear_output
 from IPython.core.magic import register_line_magic
+
 
 fairy = Fairy()
 
@@ -96,6 +98,7 @@ wid_upload_datas_btn.on_click(upload_datas_btn)
 
 @register_line_magic
 def login_tool(line):
+    clear_output()
     display(
         widgets.VBox(
             [
@@ -109,11 +112,13 @@ def login_tool(line):
 
 @register_line_magic
 def path_manager(line):
-    display(
-        widgets.VBox(
-            [
-                widgets.HBox([wid_video, wid_upload_videos_btn]),
-                widgets.HBox([wid_data, wid_upload_datas_btn]),
-            ]
+    clear_output()
+    if cipher.check(fairy.data_config[wid_username.value]):
+        display(
+            widgets.VBox(
+                [
+                    widgets.HBox([wid_video, wid_upload_videos_btn]),
+                    widgets.HBox([wid_data, wid_upload_datas_btn]),
+                ]
+            )
         )
-    )
