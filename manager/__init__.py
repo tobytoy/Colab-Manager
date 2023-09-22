@@ -1,8 +1,12 @@
 import os
 import rich
+import json
+import pickle
+import pandas
 from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
+from moviepy.editor import VideoFileClip
 from manager.util import Fairy, Cipher
 from IPython.display import clear_output
 from IPython.core.magic import register_line_magic
@@ -129,3 +133,32 @@ def path_manager(line):
         )
     else:
         rich.print('請登入以後再使用')
+
+@register_line_magic
+def video_show_tool(line):
+    clear_output()
+    if cipher._flag:
+        _rate = "50%" if line == "" else (line + "%")
+        VideoFileClip(str(wid_video.value)).ipython_display(width=_rate)
+    else:
+        rich.print('請登入以後再使用')
+
+@register_line_magic
+def data_show_tool(line):
+    clear_output()
+    if cipher._flag:
+        _sub = wid_data.value.name.rsplit('.', 1)[1]
+        if _sub == 'xlsx':
+            display(pandas.read_excel(wid_data.value))
+        elif _sub == 'json':
+            with open(wid_data.value, 'r') as f:
+                rich.print(json.load(f))
+        elif _sub == 'pickle':
+            with open(wid_data.value, 'r') as f:
+                rich.print(pickle.load(f))
+        else:
+            rich.print('not supported yet!')
+    else:
+        rich.print('請登入以後再使用')
+
+
