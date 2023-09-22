@@ -284,7 +284,7 @@ class Cipher():
             self._u8 = (pa[:32] if len(pa) >= 32 else acc[acc_n % len(
                 acc)] * p_n + pa + s_p_s[acc_n % len(s_p_s)] * (32 - len(pa) - p_n)).encode('utf-8')
         else:
-            self._u8 = "".encode('utf-8')
+            self._u8 = ("u8"*16).encode('utf-8')
 
     def decrypt(self, eb: str, tb: str, nb: str) -> list[str]:
         e, t, n = map(lambda x: b64decode(x), [eb, tb, nb])

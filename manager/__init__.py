@@ -118,7 +118,7 @@ def login_tool(line):
 @register_line_magic
 def path_manager(line):
     clear_output()
-    if cipher._flags:
+    if cipher._flag:
         display(
             widgets.VBox(
                 [
@@ -128,4 +128,4 @@ def path_manager(line):
             )
         )
     else:
-        rich.rprint('請登入')
+        rich.print('請登入以後再使用')
