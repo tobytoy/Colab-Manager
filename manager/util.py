@@ -421,6 +421,11 @@ class Fairy:
             subprocess.check_output(["mkdir", self.video_output_root_path],
                                     stderr=subprocess.STDOUT)
 
+        self.data_root_path = Path(config["PATH"]["data_root_path"])
+        if self.data_root_path.exists() == False:
+            subprocess.check_output(["mkdir", self.data_root_path],
+                                    stderr=subprocess.STDOUT)
+
         self.data_output_root_path = Path(
             config["PATH"]["data_output_root_path"])
         if self.data_output_root_path.exists() == False:

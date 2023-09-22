@@ -1,7 +1,10 @@
-from IPython.core.magic import register_line_magic
-import ipywidgets as widgets
+import os
 import rich
+from pathlib import Path
+import ipywidgets as widgets
+from google.colab import files
 from manager.util import Fairy
+from IPython.core.magic import register_line_magic
 
 fairy = Fairy()
 
@@ -12,10 +15,35 @@ wid_import_btn = widgets.Button(
 
 wid_account = widgets.Text(description='Account')
 wid_password = widgets.Password(description='Password')
-wid_username = widgets.Dropdown(options=list(fairy.data_config.keys()), description='Username')
+wid_username = widgets.Dropdown(options=list(
+    fairy.data_config.keys()), description='Username')
 wid_project = widgets.Text(description='Project')
 
 wid_login_btn = widgets.Button(description='Login', disabled=False)
+
+# focus_video_list = list(fairy.video_root_path.glob('*.mp4')) + list(fairy.video_output_root_path.glob('*.mp4'))
+# focus_data_list = list(fairy.data_root_path.glob('*.*')) + list(fairy.data_output_root_path.glob('*.*'))
+
+wid_upload_videos_btn = widgets.Button(
+    description='Upload Videos', disabled=False)
+wid_upload_datas_btn = widgets.Button(
+    description='Upload Datas', disabled=False)
+
+wid_video = widgets.Dropdown(
+    options=[(item.name, item)
+             for i, item in enumerate(list(fairy.video_root_path.glob('*.mp4')) +
+                                      list(fairy.video_output_root_path.glob('*.mp4')))
+             ],
+    description='Video : ',
+)
+wid_data = widgets.Dropdown(
+    options=[(item.name, item)
+             for i, item in enumerate(list(fairy.data_root_path.glob('*.*')) +
+                                      list(fairy.data_output_root_path.glob('*.*')))
+             ],
+    description='Data : ',
+)
+
 
 def import_btn(wid_import_btn):
     _key = list(wid_login_file.value.keys())[0]
@@ -25,14 +53,31 @@ def import_btn(wid_import_btn):
     wid_username.value = _content['username']
     wid_project.value = _content['project']
 
+
 def login_btn(wid_login_btn):
     from manager.util import Cipher
     cipher = Cipher(wid_account.value, wid_password.value)
     if cipher.check(fairy.data_config[wid_username.value]):
         rich.print('設定完畢，歡迎使用。')
 
+
+def upload_videos_btn(wid_upload_videos_btn):
+    uploaded = files.upload()
+    for filename, file_data in uploaded.items():
+        os.rename(filename, (fairy.video_root_path/filename))
+
+
+def upload_datas_btn(wid_upload_datas_btn):
+    uploaded = files.upload()
+    for filename, file_data in uploaded.items():
+        os.rename(filename, (fairy.data_root_path/filename))
+
+
 wid_import_btn.on_click(import_btn)
 wid_login_btn.on_click(login_btn)
+wid_upload_videos_btn.on_click(upload_videos_btn)
+wid_upload_datas_btn.on_click(upload_datas_btn)
+
 
 @register_line_magic
 def login_tool(line):
@@ -40,8 +85,20 @@ def login_tool(line):
         widgets.VBox(
             [
                 widgets.HBox([wid_login_file, wid_import_btn]),
-                widgets.HBox([wid_account, wid_password, wid_username, wid_project]),
-                widgets.HBox([wid_login_btn]),]
+                widgets.HBox([wid_account, wid_password,
+                             wid_username, wid_project]),
+                widgets.HBox([wid_login_btn]),
+            ]
         )
     )
 
+@register_line_magic
+def path_manager(line):
+    display(
+        widgets.VBox(
+            [
+                widgets.HBox([wid_video, wid_upload_videos_btn]),
+                widgets.HBox([wid_data, wid_upload_datas_btn]),
+            ]
+        )
+    )
