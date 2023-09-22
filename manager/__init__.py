@@ -9,6 +9,7 @@ from IPython.core.magic import register_line_magic
 
 
 fairy = Fairy()
+cipher = None
 
 wid_login_file = widgets.FileUpload(
     description='Upload login file', accept='.login',  multiple=False)
@@ -56,10 +57,16 @@ def import_btn(wid_import_btn):
 
 
 def login_btn(wid_login_btn):
+    global cipher
     from manager.util import Cipher
     cipher = Cipher(wid_account.value, wid_password.value)
-    if cipher.check(fairy.data_config[wid_username.value]):
-        rich.print('設定完畢，歡迎使用。')
+    # user_2 設定完要拿掉
+    if wid_username.value in fairy.data_config.keys() or wid_username.value == 'user_2':
+        if cipher.check(fairy.data_config[wid_username.value]):
+            rich.print('設定完畢，歡迎使用。')
+    else:
+        rich.print('你不是使用者。')
+
 
 def focus_video_fun():
     return list(fairy.video_root_path.glob('*.mp4')) \
@@ -113,7 +120,7 @@ def login_tool(line):
 @register_line_magic
 def path_manager(line):
     clear_output()
-    if cipher.check(fairy.data_config[wid_username.value]):
+    if cipher.check:
         display(
             widgets.VBox(
                 [

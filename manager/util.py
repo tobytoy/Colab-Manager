@@ -274,6 +274,7 @@ def focusOnHumanKeypoint_check(item):
 
 class Cipher():
     def __init__(self, acc: str, pa: str) -> None:
+        self.check = False
         acc_n = sum([ord(_) for _ in acc])
         s_p_s = "".join([chr(i) for i in range(33, 127)])
         p_n = acc_n % (32 - len(pa))
@@ -288,6 +289,7 @@ class Cipher():
         try:
             _flag = float(self.decrypt(*check_data['check']).split(
                 '-')[1]) < time.time() if 'check' in check_data.keys() else False
+            self.check = _flag
             return _flag
         except Exception as err:
             if str(err) == 'MAC check failed':
