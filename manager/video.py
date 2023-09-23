@@ -2,7 +2,7 @@ import cv2
 import configparser
 from PIL import Image
 import moviepy as mvp
-# from moviepy.editor import *
+from manager import colab_tool
 from moviepy.editor import VideoFileClip
 from matplotlib import pyplot as plt
 
@@ -22,6 +22,9 @@ class Video:
         self.video_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.video_fps    = self.cap.get(cv2.CAP_PROP_FPS)
 
+        self.label_indexs = [i for i in range(0, (self.video_length+1), int(self.video_length/10))]
+        self.label_frames = []
+
         print(f"影片寬:{self.video_width}, 影片高:{self.video_height}, 影片長:{self.video_length}, fps:{self.video_fps}")
         
         # get frame by index
@@ -35,19 +38,38 @@ class Video:
             if count == self.frame_index:
                 self.frame = frame
                 break
+            if count in self.label_indexs:
+                self.label_frames.append(frame[:,:,::-1])
             count += 1
         self.cap.release()
 
-    def draw_rectangle(self, video_hw = 530, start_x = 350, start_y = 120, show = False):
-        self.start_x  = start_x
-        self.start_y  = start_y
-        self.video_hw = video_hw
+    def annotate_square_one(self) -> None:
+        self.annotate_boxes = []
+        colab_tool.annotate_square_one(self.label_frames, box_storage_pointer=self.annotate_boxes)
+        self.one_box = self.annotate_boxes[0][0]
+        _y = self.one_box[0]
+        _x = self.one_box[1]
+        _h = self.one_box[2] - self.one_box[0]
+        _w = self.one_box[3] - self.one_box[1]
+
+        self.start_x = int(self.video_width * _x)
+        self.start_y = int(self.video_height * _y)
+        self.video_hw = int(max(self.video_width * _w, self.video_height * _h))
+
+
+    def draw_rectangle(self, video_hw = 530, start_x = 350, start_y = 120, reload = False, show = False):
+        if reload:
+            pass
+        else:
+            self.start_x  = start_x
+            self.start_y  = start_y
+            self.video_hw = video_hw
 
         cv2.rectangle(self.frame,
                 (start_x, start_y),
                 (start_x+video_hw, start_y+video_hw),
                 (0,0,255),
-                3,
+                2,
                 cv2.LINE_AA)
         if show:
             plt.figure(figsize=(15,15))

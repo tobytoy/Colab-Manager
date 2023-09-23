@@ -13,13 +13,14 @@ import ipywidgets as widgets
 from google.colab import files
 from moviepy.editor import VideoFileClip
 from manager.util import Fairy, Cipher
+from manager.video import Video as MyVideo
 from IPython.display import clear_output
 from IPython.core.magic import register_line_magic, register_cell_magic
 
 
 fairy = Fairy()
 cipher = Cipher()
-
+my_video = MyVideo(video_path='videos/dumbbell legs.mp4')
 
 ################################
 # widgets
@@ -186,8 +187,6 @@ def cipher_check(function):
     return wrapper
 
 
-
-
 ################################
 # tools
 ################################
@@ -206,6 +205,13 @@ def login_tool(line):
             ]
         )
     )
+
+# quick display show
+
+
+@register_line_magic
+def path_display(line): return display(widgets.HBox([wid_video, wid_refresh_btn])) if bool(
+    line) else display(widgets.HBox([wid_data, wid_refresh_btn]))
 
 
 @cipher_check
@@ -319,14 +325,67 @@ def excel_cut_video(line):
     with open(fairy.data_output_root_path / (wid_project.value + '_class.json'), 'w') as f:
         json.dump(sample_class_json, f)
 
+    wid_video.options = [(item.name, item)
+                         for i, item in enumerate(focus_video_fun())]
     print('All Done')
+
 
 @cipher_check
 def video_cut_fit(line):
     _time = line.split(' ')
-    video = VideoFileClip(str(wid_video.value)).subclip(int(_time[0]), int(_time[1]))
+    video = VideoFileClip(str(wid_video.value)).subclip(
+        int(_time[0]), int(_time[1]))
     video.write_videofile(f"{str(fairy.video_output_root_path)}/{wid_video.value.name.rsplit('.',1)[0]+'_fit.mp4'}",
-                temp_audiofile="temp/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac", verbose=False)
+                          temp_audiofile="temp/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac", verbose=False)
+    wid_video.options = [(item.name, item)
+                         for i, item in enumerate(focus_video_fun())]
+
+
+@cipher_check
+def video_preprocessing(line):
+    global my_video
+    my_video = MyVideo(video_path=str(wid_video.value), frame_index=0)
+    my_video.annotate_square_one()
+
+
+@cipher_check
+def video_preprocessing_classical(line):
+    global my_video
+    _var = line.split(' ')
+    my_video = MyVideo(video_path=str(wid_video.value),
+                       frame_index=int(_var[3]))
+    my_video.draw_rectangle(int(_var[0]), int(
+        _var[1]), int(_var[2]), True, False)
+
+
+@cipher_check
+def video_cut_square(line):
+    my_video.video_cutting(flip_flag=bool(line), show=False)
+
+
+@cipher_check
+def model_inference_video(line):
+    fairy.model_inference_video()
+
+
+@cipher_check
+def modify_pickle(line):
+    _var = line.split(' ')
+    fairy.modify_pickle(frame_index=int(_var[1]),
+                        body_index=int(_var[2]),
+                        x_rate=float(_var[3]),
+                        y_rate=float(_var[4]),
+                        save_pickle_check=bool(_var[0]),)
+
+
+@cipher_check
+def json_scheme_check(line):
+    fairy.json_scheme_check(sample_json=eval(line))
+
+
+@cipher_check
+def write_json_file(line):
+    fairy.write_json_file(sample_json=eval(line))
 
 
 ################################
@@ -347,8 +406,15 @@ line_string = ' '.join([
     'data_show_tool',
     'demo_data_prepare',
     'excel_cut_video',
+    'video_cut_fit',
+    'video_preprocessing',
+    'video_preprocessing_classical',
+    'video_cut_square',
+    'model_inference_video',
+    'modify_pickle',
+    'json_scheme_check',
+    'write_json_file',
 ])
-
 
 
 ################################
