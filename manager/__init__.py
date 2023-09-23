@@ -83,7 +83,8 @@ def login_btn(wid_login_btn):
         if cipher.check(fairy.data_config[wid_username.value]):
             _user = wid_username.value
             data_cipher = fairy.data_config[_user]
-            web_master = WebMaster(cipher=cipher, user=_user, check_list=['ngrok', 'git', 'repo_p', 'cont_p'], check_dict=data_cipher)
+            _check_list = ['ngrok_t', 'git_m', 'repo_p', 'cont_p'] if _user == 'master' else ['ngrok', 'git', 'repo_p', 'cont_p']
+            web_master = WebMaster(cipher=cipher, user=_user, check_list=_check_list, check_dict=data_cipher)
             rich.print('設定完畢，歡迎使用。')
     else:
         rich.print('你不是使用者。')
