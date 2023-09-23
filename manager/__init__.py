@@ -186,25 +186,7 @@ def cipher_check(function):
     return wrapper
 
 
-################################
-# register line magic
-################################
 
-def register_tools(line):
-    fun_list = line.split(' ')
-    for fun in fun_list:
-        template = f"@register_line_magic \ndef {fun}_run(line):\n    {fun}(line)"
-        exec(template)
-
-
-line_string = ' '.join([
-    'path_manager',
-    'download_tool',
-    'video_show_tool',
-    'data_show_tool',
-    'demo_data_prepare',
-    'excel_cut_video',
-])
 
 ################################
 # tools
@@ -338,6 +320,35 @@ def excel_cut_video(line):
         json.dump(sample_class_json, f)
 
     print('All Done')
+
+@cipher_check
+def video_cut_fit(line):
+    _time = line.split(' ')
+    video = VideoFileClip(str(wid_video.value)).subclip(_time[0], _time[1])
+    video.write_videofile(f"{str(fairy.video_output_root_path)}/{wid_video.value.name.rsplit('.',1)[0]+'_fit.mp4'}",
+                temp_audiofile="temp/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac", verbose=False)
+
+
+################################
+# register line magic
+################################
+
+def register_tools(line):
+    fun_list = line.split(' ')
+    for fun in fun_list:
+        template = f"@register_line_magic \ndef {fun}_run(line):\n    {fun}(line)"
+        exec(template)
+
+
+line_string = ' '.join([
+    'path_manager',
+    'download_tool',
+    'video_show_tool',
+    'data_show_tool',
+    'demo_data_prepare',
+    'excel_cut_video',
+])
+
 
 
 ################################
