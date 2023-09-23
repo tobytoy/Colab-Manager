@@ -228,7 +228,6 @@ def draw_square_one(image_urls, callbackId):
                 document.addEventListener("mousemove", handleMouseMove);
                 document.addEventListener("mouseup", handleMouseUp);
 
-
                 function resetcanvas(){
                     // clear canvas
                     ctx.clearRect(0, 0, canvas_img.width, canvas_img.height);
@@ -238,8 +237,7 @@ def draw_square_one(image_urls, callbackId):
                     // onload init new canvas and display image
                     image.onload = function() {
                         // normalize display height and canvas
-                        image.height = height;
-                        image_cont.height = canvas_img.height = image.height;
+                        image_cont.height = canvas_img.height = image.naturalHeight;
                         image_cont.width = canvas_img.width = image.naturalWidth;
                         crosshair_v.style.height = image_cont.height + "px";
                         crosshair_h.style.width = image_cont.width + "px";
@@ -248,7 +246,6 @@ def draw_square_one(image_urls, callbackId):
                         ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0,  canvas_img.width,  canvas_img.height);
 
                         // draw bounding boxes
-                        // boundingBoxes = allBoundingBoxes[curr_image];
                         boundingBoxes.map(r => {drawRect(r)});
                     };
                 }

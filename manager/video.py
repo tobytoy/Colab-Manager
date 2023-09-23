@@ -37,9 +37,9 @@ class Video:
                 break
             if count == self.frame_index:
                 self.frame = frame
-                break
+                
             if count in self.label_indexs:
-                self.label_frames.append(frame[:,:,::-1])
+                self.label_frames.append(frame[:,:,::-1].copy())
             count += 1
         self.cap.release()
 
