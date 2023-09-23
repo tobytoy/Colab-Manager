@@ -12,15 +12,18 @@ from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
 from moviepy.editor import VideoFileClip
-from manager.util import Fairy, Cipher
+from manager.util import Fairy, Cipher, WebMaster
 from manager.video import Video as MyVideo
 from IPython.display import clear_output
+from flask import Flask, jsonify, request, send_from_directory
 from IPython.core.magic import register_line_magic, register_cell_magic
+
 
 
 fairy = Fairy()
 cipher = Cipher()
 my_video = MyVideo(video_path='videos/dumbbell legs.mp4')
+web_master = None
 
 ################################
 # widgets
@@ -74,9 +77,13 @@ def import_btn(wid_import_btn):
 
 
 def login_btn(wid_login_btn):
+    global web_master 
     cipher.u8(wid_account.value, wid_password.value)
     if wid_username.value in fairy.data_config.keys():
         if cipher.check(fairy.data_config[wid_username.value]):
+            _user = wid_username.value
+            data_cipher = fairy.data_config[_user]
+            web_master = WebMaster(cipher=cipher, user=_user, check_list=['ngrok', 'git', 'repo_p', 'cont_p'], check_dict=data_cipher)
             rich.print('設定完畢，歡迎使用。')
     else:
         rich.print('你不是使用者。')
@@ -207,11 +214,9 @@ def login_tool(line):
     )
 
 # quick display show
-
-
 @register_line_magic
-def path_display(line): return display(widgets.HBox([wid_video, wid_refresh_btn])) if bool(
-    line) else display(widgets.HBox([wid_data, wid_refresh_btn]))
+def path_display(line): 
+    return display(widgets.HBox([wid_video, wid_refresh_btn])) if eval(line) else display(widgets.HBox([wid_data, wid_refresh_btn]))
 
 
 @cipher_check
@@ -352,10 +357,8 @@ def video_preprocessing(line):
 def video_preprocessing_classical(line):
     global my_video
     _var = line.split(' ')
-    my_video = MyVideo(video_path=str(wid_video.value),
-                       frame_index=int(_var[3]))
-    my_video.draw_rectangle(int(_var[0]), int(
-        _var[1]), int(_var[2]), True, False)
+    # my_video = MyVideo(video_path=str(wid_video.value), frame_index=int(_var[3]))
+    display(my_video.draw_rectangle(int(_var[0]), int(_var[1]), int(_var[2]), True, False))
 
 
 @cipher_check
@@ -375,7 +378,7 @@ def modify_pickle(line):
                         body_index=int(_var[2]),
                         x_rate=float(_var[3]),
                         y_rate=float(_var[4]),
-                        save_pickle_check=bool(_var[0]),)
+                        save_pickle_check=eval(_var[0]),)
 
 
 @cipher_check
@@ -386,6 +389,45 @@ def json_scheme_check(line):
 @cipher_check
 def write_json_file(line):
     fairy.write_json_file(sample_json=eval(line))
+
+
+@cipher_check
+def simplify_json_file(line):
+    fairy.simplify_json_file(json_path=str(wid_data.value))
+
+
+@cipher_check
+def output_hash_function(line):
+    fairy.hash_function(json_path=str(wid_data.value), remove_version_check=eval(line))
+
+
+@cipher_check
+def flask_api_server(line):
+    _var = line.split(' ')
+    url_method = _var[0]
+    url_path = _var[1]
+
+    app = Flask(__name__)
+    web_master.run_with_ngrok(app)
+
+    @app.route('/project_name', methods = ['GET'])
+    def proj_name():
+        if request.method == 'GET':
+            return wid_password.value
+    
+    @app.route(url_path + '/<string:value>', methods = [url_method])
+    def sent_json(value):
+        with open(wid_data.value, 'r') as f:
+            data = json.load(f)
+        if request.method == url_method:
+            return jsonify(data)
+
+    @app.route('/get_video/<string:path>')
+    def get_file(path):
+        return send_from_directory('videos_output', 'target.mp4', as_attachment=True)
+
+    app.run()
+
 
 
 ################################
@@ -414,6 +456,9 @@ line_string = ' '.join([
     'modify_pickle',
     'json_scheme_check',
     'write_json_file',
+    'simplify_json_file',
+    'output_hash_function',
+    'flask_api_server',
 ])
 
 
