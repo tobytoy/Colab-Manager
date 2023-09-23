@@ -414,7 +414,7 @@ def flask_api_server(line):
     @app.route('/project_name', methods = ['GET'])
     def proj_name():
         if request.method == 'GET':
-            return wid_password.value
+            return wid_project.value
     
     @app.route(url_path + '/<string:value>', methods = [url_method])
     def sent_json(value):
