@@ -1,4 +1,5 @@
 import os
+import cv2
 import rich
 import json
 import pytube
@@ -203,7 +204,13 @@ def video_show_tool(line):
     clear_output()
     if cipher._flag:
         _rate = "50%" if line == "" else (line + "%")
-        display(VideoFileClip(str(wid_video.value)).ipython_display(width=_rate))
+        max_duration = 90
+        cap = cv2.VideoCapture(str(wid_video.value))
+        duration = cap.get(7)/cap.get(5)
+        if duration > max_duration:
+            display(VideoFileClip(str(wid_video.value)).subclip(0, max_duration).ipython_display(maxduration=(max_duration+1), width=_rate))
+        else:
+            display(VideoFileClip(str(wid_video.value)).ipython_display(maxduration=(max_duration+1), width=_rate))
     else:
         rich.print('請登入以後再使用')
 
