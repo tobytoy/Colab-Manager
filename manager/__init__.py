@@ -190,8 +190,6 @@ def cipher_check(function):
 # register line magic
 ################################
 
-
-@register_line_magic
 def register_tools(line):
     fun_list = line.split(' ')
     for fun in fun_list:
@@ -207,7 +205,6 @@ line_string = ' '.join([
     'demo_data_prepare',
     'excel_cut_video',
 ])
-
 
 ################################
 # tools
@@ -346,4 +343,4 @@ def excel_cut_video(line):
 ################################
 # register line runner
 ################################
-%register_tools $line_string
+register_tools(line_string)
