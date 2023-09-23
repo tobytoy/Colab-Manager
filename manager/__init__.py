@@ -324,7 +324,7 @@ def excel_cut_video(line):
 @cipher_check
 def video_cut_fit(line):
     _time = line.split(' ')
-    video = VideoFileClip(str(wid_video.value)).subclip(_time[0], _time[1])
+    video = VideoFileClip(str(wid_video.value)).subclip(int(_time[0]), int(_time[1]))
     video.write_videofile(f"{str(fairy.video_output_root_path)}/{wid_video.value.name.rsplit('.',1)[0]+'_fit.mp4'}",
                 temp_audiofile="temp/temp-audio.m4a", remove_temp=True, codec="libx264", audio_codec="aac", verbose=False)
 
