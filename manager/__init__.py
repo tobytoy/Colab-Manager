@@ -85,9 +85,21 @@ def login_btn(wid_login_btn):
             data_cipher = fairy.data_config[_user]
             _check_list = ['ngrok_t', 'git_m', 'repo_p', 'cont_p'] if _user == 'master' else ['ngrok', 'git', 'repo_p', 'cont_p']
             web_master = WebMaster(cipher=cipher, user=_user, check_list=_check_list, check_dict=data_cipher)
-            rich.print('設定完畢，歡迎使用。')
+            msg_pass = """# Setup complete, welcome to use the action label system"""
+            _md = rich.markdown.Markdown(msg_pass)
+            rich.console.Console.print(_md)
     else:
-        rich.print('你不是使用者。')
+        msg_wrong = """
+        # Welcome The Johnson Action Label System
+
+        您好請登入再使用喔
+
+        1. 你可能帳密輸打錯或使用者選錯
+        2. 如果你還沒註冊請去 [註冊](https://www.google.com/)
+        """
+        _md = rich.markdown.Markdown(msg_wrong)
+        rich.console.Console.print(_md)
+        
 
 
 def focus_video_fun():
