@@ -87,7 +87,7 @@ def login_btn(wid_login_btn):
             web_master = WebMaster(cipher=cipher, user=_user, check_list=_check_list, check_dict=data_cipher)
             msg_pass = """# Setup complete, welcome to use the action label system"""
             _md = rich.markdown.Markdown(msg_pass)
-            rich.console.Console.print(_md)
+            rich.console.Console().print(_md)
     else:
         msg_wrong = """
         # Welcome The Johnson Action Label System
@@ -98,7 +98,7 @@ def login_btn(wid_login_btn):
         2. 如果你還沒註冊請去 [註冊](https://www.google.com/)
         """
         _md = rich.markdown.Markdown(msg_wrong)
-        rich.console.Console.print(_md)
+        rich.console.Console().print(_md)
         
 
 
