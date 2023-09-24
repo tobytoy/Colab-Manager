@@ -633,11 +633,12 @@ class Fairy:
             json.dump(sample_json, f, indent=4)
 
     def simplify_json_file(self, json_path='datas_output/labels.json'):
+        size = os.path.getsize(json_path)
+
         with open(json_path, 'r') as f:
             data = json.load(f)
 
         label_index_list = []
-
         for human_keypoint_label in data["focusOnHumanKeypoint"]:
             check_points = human_keypoint_label['checkPoints']
             for check_point in check_points:
@@ -659,6 +660,11 @@ class Fairy:
         self.json_simple_path = Path(config["PATH"]["json_simple_output_path"])
         with open(self.json_simple_path, 'w') as f:
             json.dump(data, f)
+
+        size_simple = os.path.getsize(self.json_simple_path)
+        print(f"壓縮率 {round(size_simple/size*100, 2)} %")
+        
+
 
     def hash_function(self, json_path='datas_output/labels.json', remove_version_check=True):
         with open(json_path, 'r') as f:
