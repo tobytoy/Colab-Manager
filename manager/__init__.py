@@ -1,6 +1,6 @@
 import os
 import cv2
-import rich
+
 import json
 import pytube
 import pickle
@@ -11,13 +11,14 @@ import openpyxl
 from pathlib import Path
 import ipywidgets as widgets
 from google.colab import files
+import rich
+from rich.markdown import Markdown
 from moviepy.editor import VideoFileClip
 from manager.util import Fairy, Cipher, WebMaster
 from manager.video import Video as MyVideo
 from IPython.display import clear_output
 from flask import Flask, jsonify, request, send_from_directory
 from IPython.core.magic import register_line_magic, register_cell_magic
-
 
 
 fairy = Fairy()
@@ -86,7 +87,7 @@ def login_btn(wid_login_btn):
             _check_list = ['ngrok_t', 'git_m', 'repo_p', 'cont_p'] if _user == 'master' else ['ngrok', 'git', 'repo_p', 'cont_p']
             web_master = WebMaster(cipher=cipher, user=_user, check_list=_check_list, check_dict=data_cipher)
             msg_pass = """# Setup complete, welcome to use the action label system"""
-            _md = rich.markdown.Markdown(msg_pass)
+            _md = Markdown(msg_pass)
             rich.console.Console().print(_md)
     else:
         msg_wrong = """
@@ -97,7 +98,7 @@ def login_btn(wid_login_btn):
         1. 你可能帳密輸打錯或使用者選錯
         2. 如果你還沒註冊請去 [註冊](https://www.google.com/)
         """
-        _md = rich.markdown.Markdown(msg_wrong)
+        _md = Markdown(msg_wrong)
         rich.console.Console().print(_md)
         
 
