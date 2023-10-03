@@ -46,9 +46,10 @@ class Video:
     def annotate_square_one(self) -> None:
         self.annotate_boxes = []
         colab_tool.annotate_square_one(self.label_frames, box_storage_pointer=self.annotate_boxes)
-        
+    
     def draw_rectangle(self, video_hw = 530, start_x = 350, start_y = 120, reload = False, show = False):
         if reload and len(self.annotate_boxes) > 0:
+            print('reload')
             one_box = self.annotate_boxes[0][0]
             _y = one_box[0]
             _x = one_box[1]
@@ -59,13 +60,14 @@ class Video:
             self.start_y = int(self.video_height * _y)
             self.video_hw = int(max(self.video_width * _w, self.video_height * _h))
         else:
+            print('no reload')
             self.start_x  = start_x
             self.start_y  = start_y
             self.video_hw = video_hw
 
         cv2.rectangle(self.frame,
-                (start_x, start_y),
-                (start_x+video_hw, start_y+video_hw),
+                (self.start_x, self.start_y),
+                (self.start_x+self.video_hw, self.start_y+self.video_hw),
                 (0,0,255),
                 2,
                 cv2.LINE_AA)

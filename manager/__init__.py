@@ -371,8 +371,12 @@ def video_preprocessing(line):
 def video_preprocessing_classical(line):
     global my_video
     _var = line.split(' ')
-    # my_video = MyVideo(video_path=str(wid_video.value), frame_index=int(_var[3]))
-    display(my_video.draw_rectangle(int(_var[0]), int(_var[1]), int(_var[2]), True, False))
+    if _var[0] == 'New':     
+        display(my_video.draw_rectangle(0, 0, 0, True, False))
+    else:
+        my_video = MyVideo(video_path=str(wid_video.value), frame_index=int(_var[4]))
+        display(my_video.draw_rectangle(int(_var[1]), int(_var[2]), int(_var[3]), False, False))
+
 
 
 @cipher_check
