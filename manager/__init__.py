@@ -381,7 +381,7 @@ def video_preprocessing_classical(line):
 
 @cipher_check
 def video_cut_square(line):
-    my_video.video_cutting(flip_flag=bool(line), show=False)
+    my_video.video_cutting(flip_flag=eval(line), show=False)
 
 
 @cipher_check
