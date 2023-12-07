@@ -30,10 +30,10 @@ config.read("manager/config/config.ini")
 json_schema = {
     "description": "JSON Schema for labeler",
     "type": "object",
-    "required": ["version", "label", "duration", "focusOnHumanKeypoint"],
+    "required": ["version", "label", "duration", "rateMethod", "notholdPunish", "focusOnHumanKeypoint"],
     "properties": {
         "version": {
-            "enum": ["v1.2.1"]
+            "enum": ["v1.3.1"]
         },
         "label": {
             "enum": [[]]
@@ -41,13 +41,20 @@ json_schema = {
         "duration": {
             "type": "integer"
         },
+        "rateMethod": {
+            "enum": ["real", "real_1_0_0", "one"]
+        },
+        "notholdPunish": {
+            "type": "number",
+            "minimum": 0,
+        },
         "focusOnHumanKeypoint": {
             "type": "array",
             "items": {
                 "type": "object",
                 "oneOf": [
                     {
-                        "required": ["part", "type", "method", "k_index", "k_1", "k_2", "threshold", "move_type", "checkPoints"],
+                        "required": ["part", "type", "method", "kIndex", "k1", "k2", "threshold", "moveType", "indexRange", "checkPoints"],
                         "properties": {
                             "part": {
                                 "enum": ["left_arm", "right_arm", "left_leg", "right_leg"]
@@ -58,15 +65,15 @@ json_schema = {
                             "method": {
                                 "enum": [12, 23, 13, 123]
                             },
-                            "k_index": {
+                            "kIndex": {
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 16
                             },
-                            "k_1": {
+                            "k1": {
                                 "enum": [0]
                             },
-                            "k_2": {
+                            "k2": {
                                 "enum": [1]
                             },
                             "threshold": {
@@ -74,16 +81,20 @@ json_schema = {
                                 "minimum": 0,
                                 "maximum": 1
                             },
-                            "move_type": {
+                            "moveType": {
                                 "enum": ["hold", "around"]
+                            },
+                            "indexRange": {
+                                "type": "integer",
+                                "minimum": 1,
                             },
                             "checkPoints": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "required": ["label_index", "d"],
+                                    "required": ["labelIndex", "d", "indexRange"],
                                     "properties": {
-                                        "label_index": {
+                                        "labelIndex": {
                                             "type": "integer",
                                             "minimum": 0,
                                         },
@@ -100,7 +111,7 @@ json_schema = {
                         }
                     },
                     {
-                        "required": ["part", "type", "method", "k_index", "k_1", "k_2", "threshold", "move_type", "checkPoints"],
+                        "required": ["part", "type", "method", "kIndex", "k1", "k2", "threshold", "moveType", "indexRange", "checkPoints"],
                         "properties": {
                             "part": {
                                 "enum": ["body"]
@@ -111,15 +122,15 @@ json_schema = {
                             "method": {
                                 "enum": [13, 31, 24, 42]
                             },
-                            "k_index": {
+                            "kIndex": {
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 16
                             },
-                            "k_1": {
+                            "k1": {
                                 "enum": [0]
                             },
-                            "k_2": {
+                            "k2": {
                                 "enum": [1]
                             },
                             "threshold": {
@@ -127,16 +138,20 @@ json_schema = {
                                 "minimum": 0,
                                 "maximum": 1
                             },
-                            "move_type": {
+                            "moveType": {
                                 "enum": ["hold", "around"]
+                            },
+                            "indexRange": {
+                                "type": "integer",
+                                "minimum": 1,
                             },
                             "checkPoints": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "required": ["label_index", "d"],
+                                    "required": ["labelIndex", "d"],
                                     "properties": {
-                                        "label_index": {
+                                        "labelIndex": {
                                             "type": "integer",
                                             "minimum": 0,
                                         },
@@ -153,7 +168,7 @@ json_schema = {
                         }
                     },
                     {
-                        "required": ["part", "type", "method", "k_index", "k_1", "k_2", "threshold", "move_type", "checkPoints"],
+                        "required": ["part", "type", "method", "kIndex", "k1", "k2", "threshold", "moveType", "indexRange", "checkPoints"],
                         "properties": {
                             "part": {
                                 "enum": ["left_arm", "right_arm", "left_leg", "right_leg", "body"]
@@ -164,17 +179,17 @@ json_schema = {
                             "method": {
                                 "type": "integer",
                             },
-                            "k_index": {
+                            "kIndex": {
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 16
                             },
-                            "k_1": {
+                            "k1": {
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 16
                             },
-                            "k_2": {
+                            "k2": {
                                 "type": "integer",
                                 "minimum": 0,
                                 "maximum": 16
@@ -184,16 +199,144 @@ json_schema = {
                                 "minimum": 0,
                                 "maximum": 1
                             },
-                            "move_type": {
+                            "moveType": {
                                 "enum": ["hold", "around"]
+                            },
+                            "indexRange": {
+                                "type": "integer",
+                                "minimum": 1,
                             },
                             "checkPoints": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "required": ["label_index", "d"],
+                                    "required": ["labelIndex", "d"],
                                     "properties": {
-                                        "label_index": {
+                                        "labelIndex": {
+                                            "type": "integer",
+                                            "minimum": 0,
+                                        },
+                                        "d": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 2
+                                        }
+                                    }
+
+                                }
+                            }
+
+                        }
+                    },
+                    {
+                        "required": ["part", "type", "method", "kIndex", "k1", "k2", "k3", "k4", "threshold", "moveType", "checkPoints"],
+                        "properties": {
+                            "part": {
+                                "enum": ["x", "y", "xy", "yx"]
+                            },
+                            "type": {
+                                "enum": ["keypoints"]
+                            },
+                            "method": {
+                                "type": "integer",
+                            },
+                            "kIndex": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "k1": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "k2": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "k3": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "k4": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "threshold": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "moveType": {
+                                "enum": ["hold"]
+                            },
+                            "checkPoints": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": ["d"],
+                                    "properties": {
+                                        "d": {
+                                            "type": "number",
+                                            "minimum": 0,
+                                            "maximum": 2
+                                        }
+                                    }
+
+                                }
+                            }
+
+                        }
+                    },
+                    {
+                        "required": ["part", "type", "method", "kIndex", "k1", "k2", "threshold", "moveType", "indexRange", "checkPoints"],
+                        "properties": {
+                            "part": {
+                                "enum": ["left_arm", "right_arm", "left_leg", "right_leg", "body"]
+                            },
+                            "type": {
+                                "enum": ["angle", "vector"]
+                            },
+                            "method": {
+                                "enum": [0]
+                            },
+                            "kIndex": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "k1": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "k2": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 16
+                            },
+                            "threshold": {
+                                "type": "number",
+                                "minimum": 0,
+                                "maximum": 1
+                            },
+                            "moveType": {
+                                "enum": ["hold", "around"]
+                            },
+                            "indexRange": {
+                                "type": "integer",
+                                "minimum": 1,
+                            },
+                            "checkPoints": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "required": ["labelIndex", "d"],
+                                    "properties": {
+                                        "labelIndex": {
                                             "type": "integer",
                                             "minimum": 0,
                                         },
