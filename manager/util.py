@@ -92,7 +92,7 @@ json_schema = {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
-                                    "required": ["labelIndex", "d", "indexRange"],
+                                    "required": ["labelIndex", "d"],
                                     "properties": {
                                         "labelIndex": {
                                             "type": "integer",
